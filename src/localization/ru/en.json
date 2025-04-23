@@ -381,6 +381,7 @@
                     "zoom": "Масштаб",
                     "vrcplus_profile_icons": "Иконки профиля VRCPlus",
                     "tooltips": "Подсказки",
+                    "age_gated_instances": "Инстансы с возрастными ограничениями",
                     "nicknames": "Заметки имени",
                     "sort_favorite_by": "Сортировать избранное по",
                     "sort_favorite_by_name": "имени",
@@ -847,7 +848,6 @@
                 "private": "Приватные",
                 "avatar_scaling_disabled": "Масштабирование аватара отключено",
                 "focus_view_disabled": "Отключить фокусировку камеры",
-                "stickers_disabled": " Отключить стикеры",
                 "future_proofing": "Перспективные решения",
                 "labs": "Labs",
                 "cache": "Кэш",
@@ -960,6 +960,7 @@
                 "rename": "Переименовать",
                 "change_description": "Изменить описание",
                 "change_content_tags": "Изменить теги содержимого",
+                "change_styles": "Изменение стилей",
                 "change_image": "Изменить изображение",
                 "download_package": "Скачать пакет Unity",
                 "delete": "Удалить",
@@ -1216,7 +1217,6 @@
             "header": "Установить теги мира",
             "avatar_scaling_disabled": "Отключить масштабирование аватара",
             "focus_view_disabled": "Отключить вид от первого лица",
-            "stickers_disabled": "Отключить стикеры",
             "enable_debugging": "Включить отладку мира для других",
             "author_tags": "Теги автора (через запятую)",
             "content_tags": "Теги предупреждения о контенте",
@@ -1242,6 +1242,16 @@
             "select_none": "Очистить",
             "cancel": "Отмена",
             "save": "Сохранить"
+        },
+            "set_avatar_styles": {
+                "header": "Установка стилей аватара",
+                "primary_style": "Основной стиль",
+                "secondary_style": "Дополнительный стиль",
+                "select_style": "Выберите стиль",
+                "save_success": "Стили аватара успешно изменены",
+                "save_failed": "Не удалось изменить стиль аватара",
+                "cancel": "Отмена",
+                "save": "Сохранить"
         },
         "vrcx_updater": {
             "header": "Обновление VRCX",
@@ -1436,7 +1446,8 @@
             "emoji_animation_frame_count": "Количество кадров:",
             "emoji_loop_pingpong": "Зацикленный PingPong",
             "flipbook_info": "Выберите спрайт-лист PNG размером 1024x1024 для использования в качестве анимированного эмодзи, доступные размеры сетки кадров: 4, 16 или 64 (максимальный FPS 64, максимальное количество кадров 64)",
-            "note": "Заметка"
+            "note": "Заметка",
+            "crop_print_border": "Обрезать рамку принта"
         },
         "change_content_image": {
             "avatar": "Изменить изображение аватара",
