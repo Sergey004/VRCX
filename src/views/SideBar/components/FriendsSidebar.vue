@@ -226,21 +226,16 @@
 
                 const allFriends = [...this.vipFriends, ...this.onlineFriends];
                 allFriends.forEach((friend) => {
-                    let locationTag;
-
-                    if (friend.ref?.$location.isRealInstance) {
-                        locationTag = friend.ref.$location.tag;
-                    } else if (this.lastLocation.friendList.has(friend.id)) {
-                        let $location = utils.parseLocation(this.lastLocation.location);
-                        if ($location.isRealInstance) {
-                            if ($location.tag === 'private') {
-                                locationTag = this.lastLocation.name;
-                            } else {
-                                locationTag = $location.tag;
-                            }
-                        }
+                    if (!friend.ref?.$location) {
+                        return;
                     }
-                    if (!locationTag) {
+
+                    let locationTag = friend.ref.$location.tag;
+                    if (!friend.ref.$location.isRealInstance && this.lastLocation.friendList.has(friend.id)) {
+                        locationTag = this.lastLocation.location;
+                    }
+                    let isRealInstance = this.isRealInstance(locationTag);
+                    if (!isRealInstance) {
                         return;
                     }
 
@@ -259,33 +254,30 @@
 
                 return sortedFriendsList.sort((a, b) => b.length - a.length);
             },
+            sameInstanceTag() {
+                const sameInstanceTag = new Set();
+                for (const item of this.friendsInSameInstance) {
+                    for (const friend of item) {
+                        if (utils.isRealInstance(friend.ref?.$location.tag)) {
+                            sameInstanceTag.add(friend.ref?.$location.tag);
+                        }
+                    }
+                }
+                return sameInstanceTag;
+            },
             onlineFriendsByGroupStatus() {
-                if (
-                    !this.isSidebarGroupByInstance ||
-                    (this.isSidebarGroupByInstance && !this.isHideFriendsInSameInstance)
-                ) {
+                if (!this.isSidebarGroupByInstance || !this.isHideFriendsInSameInstance) {
                     return this.onlineFriends;
                 }
 
-                const sameInstanceTag = new Set(
-                    this.friendsInSameInstance.flatMap((item) => item.map((friend) => friend.ref?.$location.tag))
-                );
-
-                return this.onlineFriends.filter((item) => !sameInstanceTag.has(item.ref?.$location.tag));
+                return this.onlineFriends.filter((item) => !this.sameInstanceTag.has(item.ref?.$location.tag));
             },
             vipFriendsByGroupStatus() {
-                if (
-                    !this.isSidebarGroupByInstance ||
-                    (this.isSidebarGroupByInstance && !this.isHideFriendsInSameInstance)
-                ) {
+                if (!this.isSidebarGroupByInstance || !this.isHideFriendsInSameInstance) {
                     return this.vipFriends;
                 }
 
-                const sameInstanceTag = new Set(
-                    this.friendsInSameInstance.flatMap((item) => item.map((friend) => friend.ref?.$location.tag))
-                );
-
-                return this.vipFriends.filter((item) => !sameInstanceTag.has(item.ref?.$location.tag));
+                return this.vipFriends.filter((item) => !this.sameInstanceTag.has(item.ref?.$location.tag));
             },
             // VIP friends divide by group
             vipFriendsDivideByGroup() {
@@ -297,8 +289,13 @@
                         const groupFriends = vipFriendsByGroup[key];
                         // sort groupFriends using the order of vipFriends
                         // avoid unnecessary sorting
-                        let filteredFriends = this.vipFriends.filter((friend) =>
-                            groupFriends.some((item) => item.id === friend.id)
+                        const filteredFriends = this.vipFriends.filter((friend) =>
+                            groupFriends.some((item) => {
+                                if (this.isSidebarGroupByInstance && this.isHideFriendsInSameInstance) {
+                                    return item.id === friend.id && !this.sameInstanceTag.has(item.ref?.$location.tag);
+                                }
+                                return item.id === friend.id;
+                            })
                         );
 
                         if (filteredFriends.length > 0) {
@@ -358,11 +355,15 @@
                     if (friend.ref?.location !== 'traveling') {
                         return friend.ref.location;
                     }
+                }
+                for (const friend of friendsArr) {
                     if (utils.isRealInstance(friend.ref?.travelingToLocation)) {
                         return friend.ref.travelingToLocation;
                     }
+                }
+                for (const friend of friendsArr) {
                     if (this.lastLocation.friendList.has(friend.id)) {
-                        return this.lastLocation.name;
+                        return this.lastLocation.location;
                     }
                 }
                 return friendsArr[0].ref?.location;

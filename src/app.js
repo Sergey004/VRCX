@@ -532,6 +532,10 @@ console.log(`isLinux: ${LINUX}`);
 
     API.$on('USER:LIST', function (args) {
         for (var json of args.json) {
+            if (!json.displayName) {
+                console.error('getUsers gave us garbage', json);
+                continue;
+            }
             this.$emit('USER', {
                 json,
                 params: {
@@ -1679,21 +1683,6 @@ console.log(`isLinux: ${LINUX}`);
             json.message = `${json.title}, ${json.message}`;
         } else if (json.title) {
             json.message = json.title;
-        }
-        if (json.type === 'boop') {
-            if (!json.imageUrl && json.details?.emojiId?.startsWith('file_')) {
-                // JANK: create image url from fileId
-                json.imageUrl = `https://api.vrchat.cloud/api/1/file/${json.details.emojiId}/${json.details.emojiVersion}`;
-            }
-
-            if (!json.details?.emojiId) {
-                json.message = `${json.senderUsername} Booped you! without an emoji`;
-            } else if (!json.details.emojiId.startsWith('file_')) {
-                // JANK: get emoji name from emojiId
-                json.message = `${json.senderUsername} Booped you! with ${$app.getEmojiName(json.details.emojiId)}`;
-            } else {
-                json.message = `${json.senderUsername} Booped you! with custom emoji`;
-            }
         }
         this.$emit('NOTIFICATION', {
             json,
@@ -7336,7 +7325,7 @@ console.log(`isLinux: ${LINUX}`);
     $app.data.isStartAsMinimizedState =
         (await VRCXStorage.Get('VRCX_StartAsMinimizedState')) === 'true';
     $app.data.isCloseToTray =
-        (await VRCXStorage.Get('VRCX_CloseToTray')) === 'false';
+        (await VRCXStorage.Get('VRCX_CloseToTray')) === 'true';
     if (await configRepository.getBool('VRCX_CloseToTray')) {
         // move back to JSON
         $app.data.isCloseToTray =
