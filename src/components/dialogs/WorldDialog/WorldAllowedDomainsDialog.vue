@@ -1,25 +1,21 @@
 <template>
-    <el-dialog
-        :before-close="beforeDialogClose"
+    <safe-dialog
         :visible.sync="isVisible"
-        :title="$t('dialog.allowed_video_player_domains.header')"
+        :title="t('dialog.allowed_video_player_domains.header')"
         width="600px"
         destroy-on-close
-        append-to-body
-        @mousedown.native="dialogMouseDown"
-        @mouseup.native="dialogMouseUp">
+        append-to-body>
         <div>
             <el-input
                 v-for="(domain, index) in urlList"
                 :key="index"
                 v-model="urlList[index]"
-                :value="domain"
                 size="small"
                 style="margin-top: 5px">
                 <el-button slot="append" icon="el-icon-delete" @click="urlList.splice(index, 1)"></el-button>
             </el-input>
             <el-button size="mini" style="margin-top: 5px" @click="urlList.push('')">
-                {{ $t('dialog.allowed_video_player_domains.add_domain') }}
+                {{ t('dialog.allowed_video_player_domains.add_domain') }}
             </el-button>
         </div>
         <template #footer>
@@ -28,66 +24,67 @@
                 size="small"
                 :disabled="!worldAllowedDomainsDialog.worldId"
                 @click="saveWorldAllowedDomains">
-                {{ $t('dialog.allowed_video_player_domains.save') }}
+                {{ t('dialog.allowed_video_player_domains.save') }}
             </el-button>
         </template>
-    </el-dialog>
+    </safe-dialog>
 </template>
 
-<script>
+<script setup>
+    import { ref, computed, watch, getCurrentInstance } from 'vue';
+    import { useI18n } from 'vue-i18n-bridge';
     import { worldRequest } from '../../../api';
 
-    export default {
-        name: 'WorldAllowedDomainsDialog',
-        inject: ['beforeDialogClose', 'dialogMouseDown', 'dialogMouseUp'],
-        props: {
-            worldAllowedDomainsDialog: {
-                type: Object,
-                required: true
-            }
+    const props = defineProps({
+        worldAllowedDomainsDialog: {
+            type: Object,
+            required: true
+        }
+    });
+
+    const emit = defineEmits(['update:worldAllowedDomainsDialog']);
+
+    const { proxy } = getCurrentInstance();
+
+    const { t } = useI18n();
+
+    const urlList = ref([]);
+
+    const isVisible = computed({
+        get() {
+            return props.worldAllowedDomainsDialog.visible;
         },
-        data() {
-            return {
-                urlList: []
-            };
-        },
-        computed: {
-            isVisible: {
-                get() {
-                    return this.worldAllowedDomainsDialog.visible;
-                },
-                set(val) {
-                    this.$emit('update:world-allowed-domains-dialog', {
-                        ...this.worldAllowedDomainsDialog,
-                        visible: val
-                    });
-                }
-            }
-        },
-        watch: {
-            'worldAllowedDomainsDialog.visible'(val) {
-                if (val) {
-                    this.urlList = this.worldAllowedDomainsDialog.urlList;
-                }
-            }
-        },
-        methods: {
-            saveWorldAllowedDomains() {
-                const D = this.worldAllowedDomainsDialog;
-                worldRequest
-                    .saveWorld({
-                        id: D.worldId,
-                        urlList: D.urlList
-                    })
-                    .then((args) => {
-                        this.$message({
-                            message: 'Allowed Video Player Domains updated',
-                            type: 'success'
-                        });
-                        return args;
-                    });
-                D.visible = false;
+        set(val) {
+            emit('update:worldAllowedDomainsDialog', {
+                ...props.worldAllowedDomainsDialog,
+                visible: val
+            });
+        }
+    });
+
+    watch(
+        () => props.worldAllowedDomainsDialog.visible,
+        (val) => {
+            if (val) {
+                urlList.value = props.worldAllowedDomainsDialog.urlList;
             }
         }
-    };
+    );
+
+    function saveWorldAllowedDomains() {
+        const D = props.worldAllowedDomainsDialog;
+        worldRequest
+            .saveWorld({
+                id: D.worldId,
+                urlList: urlList.value
+            })
+            .then((args) => {
+                proxy.$message({
+                    message: 'Allowed Video Player Domains updated',
+                    type: 'success'
+                });
+                return args;
+            });
+        D.visible = false;
+    }
 </script>

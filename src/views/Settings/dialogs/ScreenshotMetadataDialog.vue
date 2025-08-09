@@ -1,13 +1,10 @@
 <template>
-    <el-dialog
+    <safe-dialog
         class="x-dialog"
-        :before-close="beforeDialogClose"
         :visible.sync="screenshotMetadataDialog.visible"
         :title="t('dialog.screenshot_metadata.header')"
         width="1050px"
-        top="10vh"
-        @mousedown.native="dialogMouseDown"
-        @mouseup.native="dialogMouseUp">
+        top="10vh">
         <div
             v-if="screenshotMetadataDialog.visible"
             v-loading="screenshotMetadataDialog.loading"
@@ -39,7 +36,7 @@
                 >{{ t('dialog.screenshot_metadata.open_folder') }}</el-button
             >
             <el-button
-                v-if="API.currentUser.$isVRCPlus && screenshotMetadataDialog.metadata.filePath"
+                v-if="currentUser.$isVRCPlus && screenshotMetadataDialog.metadata.filePath"
                 size="small"
                 icon="el-icon-upload2"
                 @click="uploadScreenshotToGallery"
@@ -84,7 +81,7 @@
                 <br />
             </template>
             <span v-if="screenshotMetadataDialog.metadata.dateTime" style="margin-right: 5px">{{
-                screenshotMetadataDialog.metadata.dateTime | formatDate('long')
+                formatDateFilter(screenshotMetadataDialog.metadata.dateTime, 'long')
             }}</span>
             <span
                 v-if="screenshotMetadataDialog.metadata.fileResolution"
@@ -94,11 +91,11 @@
                 screenshotMetadataDialog.metadata.fileSize
             }}</el-tag>
             <br />
-            <location
+            <Location
                 v-if="screenshotMetadataDialog.metadata.world"
                 :location="screenshotMetadataDialog.metadata.world.instanceId"
                 :hint="screenshotMetadataDialog.metadata.world.name" />
-            <display-name
+            <DisplayName
                 v-if="screenshotMetadataDialog.metadata.author"
                 :userid="screenshotMetadataDialog.metadata.author.id"
                 :hint="screenshotMetadataDialog.metadata.author.displayName"
@@ -161,42 +158,37 @@
                 <br />
             </span>
         </div>
-    </el-dialog>
+    </safe-dialog>
 </template>
 
 <script setup>
-    import { ref, inject, computed, getCurrentInstance, watch } from 'vue';
+    import { storeToRefs } from 'pinia';
+    import { getCurrentInstance, ref, watch } from 'vue';
     import { useI18n } from 'vue-i18n-bridge';
     import { vrcPlusImageRequest } from '../../../api';
-    import Location from '../../../components/Location.vue';
+    import { useGalleryStore, useUserStore, useVrcxStore } from '../../../stores';
+    import { formatDateFilter } from '../../../shared/utils';
 
-    const API = inject('API');
-    const beforeDialogClose = inject('beforeDialogClose');
-    const dialogMouseDown = inject('dialogMouseDown');
-    const dialogMouseUp = inject('dialogMouseUp');
-    const showFullscreenImageDialog = inject('showFullscreenImageDialog');
+    const { showFullscreenImageDialog, handleGalleryImageAdd } = useGalleryStore();
+    const { currentlyDroppingFile } = storeToRefs(useVrcxStore());
+    const { currentUser } = storeToRefs(useUserStore());
 
     const { t } = useI18n();
 
     const instance = getCurrentInstance();
     const $message = instance.proxy.$message;
 
+    const userStore = useUserStore();
+    const { lookupUser } = userStore;
+
+    const { fullscreenImageDialog } = storeToRefs(useGalleryStore());
+
     const props = defineProps({
         screenshotMetadataDialog: {
             type: Object,
             required: true
-        },
-        currentlyDroppingFile: {
-            type: String,
-            default: null
-        },
-        fullscreenImageDialog: {
-            type: Object,
-            default: null
         }
     });
-
-    const emit = defineEmits(['lookupUser']);
 
     watch(
         () => props.screenshotMetadataDialog.visible,
@@ -223,13 +215,13 @@
     };
 
     function handleDrop(event) {
-        if (props.currentlyDroppingFile === null) {
+        if (currentlyDroppingFile.value === null) {
             return;
         }
-        console.log('Dropped file into viewer: ', props.currentlyDroppingFile);
+        console.log('Dropped file into viewer: ', currentlyDroppingFile.value);
 
         screenshotMetadataResetSearch();
-        getAndDisplayScreenshot(props.currentlyDroppingFile);
+        getAndDisplayScreenshot(currentlyDroppingFile.value);
 
         event.preventDefault();
     }
@@ -302,6 +294,7 @@
                 vrcPlusImageRequest
                     .uploadGalleryImage(base64Body)
                     .then((args) => {
+                        handleGalleryImageAdd(args);
                         $message({
                             message: t('message.gallery.uploaded'),
                             type: 'success'
@@ -396,12 +389,9 @@
             screenshotMetadataCarouselRef.value.setActiveItem(1);
         }
 
-        if (props.fullscreenImageDialog.visible) {
+        if (fullscreenImageDialog.value.visible) {
             // TODO
         }
-    }
-    function lookupUser(user) {
-        emit('lookupUser', user);
     }
 
     function screenshotMetadataResetSearch() {
@@ -446,8 +436,9 @@
         D.searchIndex = searchIndex;
     }
 
-    function getAndDisplayScreenshot(path, needsCarouselFiles = true) {
-        AppApi.GetScreenshotMetadata(path).then((metadata) => displayScreenshotMetadata(metadata, needsCarouselFiles));
+    async function getAndDisplayScreenshot(path, needsCarouselFiles = true) {
+        const metadata = await AppApi.GetScreenshotMetadata(path);
+        displayScreenshotMetadata(metadata, needsCarouselFiles);
     }
 
     /**
@@ -456,13 +447,19 @@
      * Example: {"error":"Invalid file selected. Please select a valid VRChat screenshot."}
      * See docs/screenshotMetadata.json for schema
      * @param {string} metadata - JSON string grabbed from PNG file
-     * @param {string} needsCarouselFiles - Whether or not to get the last/next files for the carousel
-     * @returns {void}
+     * @param {boolean} needsCarouselFiles - Whether or not to get the last/next files for the carousel
+     * @returns {Promise<void>}
      */
     async function displayScreenshotMetadata(json, needsCarouselFiles = true) {
         let time;
         let date;
         const D = props.screenshotMetadataDialog;
+        D.metadata.author = {};
+        D.metadata.world = {};
+        D.metadata.players = [];
+        D.metadata.creationDate = '';
+        D.metadata.application = '';
+
         const metadata = JSON.parse(json);
         if (!metadata?.sourceFile) {
             D.metadata = {};
@@ -508,7 +505,7 @@
             D.metadata.dateTime = Date.parse(metadata.creationDate);
         }
 
-        if (props.fullscreenImageDialog?.visible) {
+        if (fullscreenImageDialog.value.visible) {
             showFullscreenImageDialog(D.metadata.filePath);
         }
     }
