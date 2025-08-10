@@ -186,6 +186,9 @@
                 "message": "Сообщение",
                 "boop": "Буп",
                 "groupChange": "Изменение группы",
+                "event": {
+                    "announcement": "Анонс мероприятия"
+                },
                 "group": {
                     "announcement": "Объявление",
                     "informative": "Информативное сообщение",
@@ -298,6 +301,7 @@
                 "notifications": "Уведомления",
                 "wrist_overlay": "Оверлей запястья",
                 "discord_presence": "Отображение в Discord",
+                 "pictures": "Картинки",
                 "advanced": "Расширенные"
             },
             "general": {
@@ -374,6 +378,8 @@
                     "theme_mode_system": "Системная",
                     "theme_mode_light": "Светлая",
                     "theme_mode_dark": "Тёмная",
+                    "theme_mode_blue": "Синяя",
+                    "theme_mode_darkblue": "Темно-синяяя",
                     "theme_mode_darkvanillaold": "Dark Vanilla (old)",
                     "theme_mode_darkvanilla": "Dark Vanilla",
                     "theme_mode_pink": "Pink",
@@ -452,6 +458,7 @@
                         "ovrtoolkit_hud_notifications": "OVR Toolkit Уведомления в HUD",
                         "ovrtoolkit_wrist_notifications": "OVR Toolkit Уведомления на запястье",
                         "user_images": "Иконка пользователя (медленнее)",
+                        "notification_opacity": "Непрозрачность уведомлений",
                         "notification_timeout": "Время показа уведомлений"
                     },
                     "conditions": {
@@ -514,6 +521,23 @@
                     "join_button": "Кнопка Присоединиться (только для публичных)",
                     "show_details_in_private": "Показывать детали мира в приватном режиме",
                     "show_images": "Показывать изображение мира"
+                },
+                "rpc": {
+                    "vr": "VR",
+                    "desktop": "Десктоп",
+                    "join_button": "Присоедииниться",
+                    "powered_by_vrcx": "Powered by VRCX",
+                    "private_world": "Приватный мир"
+                }
+            },
+            "pictures": {
+                "pictures": {
+                    "header": "Изображения",
+                    "open_folder": "Открыть директорию",
+                    "vrc_photos": "Фото из VRChat",
+                    "steam_screenshots": "Скриншоты из Steam",
+                    "auto_delete_old_prints": "Авто удаление фото",
+                    "auto_delete_prints_from_vrc": "Удалять Старые Фото из VRC после достижения лимита на принты"
                 }
             },
             "advanced": {
@@ -551,6 +575,10 @@
                     "save_instance_stickers_to_file": {
                         "header": "Сохранить стикеры инстанса в файл",
                         "description": "Сохраните размещенные наклейки в папке «Изображения VRChat»."
+                        },
+                    "save_instance_emoji_to_file": {
+                        "header": "Сохранить снимки Эмоджи в файл",
+                        "description": "Сохранить снимки Эмодзи в папке VRChat Pictures."
                     },
                     "remote_database": {
                         "header": "Удаленная база данных аватаров",
@@ -691,7 +719,9 @@
             "pronouns": "Местоимение",
             "tags": {
                 "friend_no": "Друг №{number}",
-                "vrchat_team": "Команда VRChat"
+                "vrchat_team": "Команда VRChat",
+                "18_plus_verified": "18+ Проверено",
+                "age_verified": "Возраст проверен"
             },
             "badges": {
                 "assigned": "Назначен",
@@ -977,7 +1007,9 @@
                 "platform": "Платформа",
                 "time_spent": "Проведенное время",
                 "memo": "Заметка VRCX",
-                "memo_placeholder": "Нажмите, чтобы добавить заметку"
+                "memo_placeholder": "Нажмите, чтобы добавить заметку",
+                "listings": "Списки",
+                "gallery": "Галерея"
             },
             "json": {
                 "header": "JSON",
@@ -1013,6 +1045,9 @@
                 "unsubscribe": "Отписаться от объявлений",
                 "subscribe": "Подписаться на объявления",
                 "invite_to_group": "Пригласить в группу",
+                "manage_selected": "Управление выбранными группами ",
+                "select_all": "Выбрать все",
+                "deselect_all": "Снять выделение",
                 "visibility_everyone": "Видимость: все",
                 "visibility_friends": "Видимость: Только друзья",
                 "visibility_hidden": "Видимость: Только я",
@@ -1148,6 +1183,7 @@
             "content_pedestals": "Пьедесталы",
             "content_prints": "Принты",
             "content_drones": "Дроны",
+            "content_items": "Вещи",
             "world_id": "ID Мира",
             "instance_id": "ID инстанса",
             "instance_id_placeholder": "Случайный",
@@ -1190,7 +1226,7 @@
             "delete_old_cache": "Удалить старые версии из кэша",
             "sweep_cache": "Удалить кэш",
             "max_cache_size": "Макс. размер кэша [GB] (мин. 30)",
-            "cache_expiry_delay": "Срок действия кэша [Days] (30 – 150)",
+            "cache_expiry_delay": "Срок действия кэша [Days] (мин. 30)",
             "cache_directory": "Местоположение папки кэша",
             "picture_directory": "Местоположение папки картинок",
             "fpv_steadycam_fov": "Угол обзора Steadycam от первого лица",
@@ -1429,12 +1465,13 @@
         },
         "gallery_icons": {
             "header": "Фотографии, иконки и эмодзи",
-            "description": "Рекомендуемый размер изображения: 1200x900px (4:3)",
+            "recommended_image_size": "Рекомендуемый размер изображения: 1200x900px (4:3)",
             "gallery": "Фото",
             "icons": "Иконки",
             "emojis": "Эмодзи",
             "stickers": "Стикеры",
             "prints": "Снимки",
+            "inventory": "Инвентарь",
             "refresh": "Обновить",
             "upload": "Загрузить",
             "clear": "Очистить",
@@ -1445,7 +1482,8 @@
             "emoji_loop_pingpong": "Зацикленный PingPong",
             "flipbook_info": "Выберите спрайт-лист PNG размером 1024x1024 для использования в качестве анимированного эмодзи, доступные размеры сетки кадров: 4, 16 или 64 (максимальный FPS 64, максимальное количество кадров 64)",
             "note": "Заметка",
-            "crop_print_border": "Обрезать рамку принта"
+            "crop_print_border": "Обрезать рамку принта",
+            "consume_bundle": "Потребляемый"
         },
         "change_content_image": {
             "avatar": "Изменить изображение аватара",
@@ -1630,6 +1668,15 @@
         "gallery": {
             "uploaded": "Изображение галереи загружено",
             "failed": "Не удалось загрузить изображение галереи"
+             },
+        "avatar_gallery": {
+            "uploaded": "В галерею загружено изображение аватара",
+            "failed": "Не удалось загрузить изображение в галерею аватарв",
+            "deleted": "Изображение из галереи аватарв удалено",
+            "not_found": "Не найден fileID в галереи аватарв",
+            "already_first": "Уже первое изображение ",
+            "already_last": "Уже последнее изображение ",
+            "reordered": "Успешно изменен порядок изображений в галерее аватара"
         },
         "world": {
             "image_changed": "Изображение мира изменено",
@@ -1899,6 +1946,7 @@
             "rank": "Ранг",
             "language": "Язык",
             "bioLink": "Био Ссылки",
+            "note": "Заметка",
             "date": "Дата",
             "user": "Пользователь",
             "type": "Тип",
